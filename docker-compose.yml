@@ -1,20 +1,35 @@
 version: '3'
+
 services:
   app:
     image: laravel-app-image
     container_name: laravel-app
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - .:/var/www/html
     working_dir: /var/www/html
-    environment:
-      - 'DB_CONNECTION=mysql'
-      - 'DB_HOST=192.241.155.75'
-      - 'DB_PORT=3306'
-      - 'DB_DATABASE=trading_acco'
-      - 'DB_USERNAME=trading_acco'
-      - 'DB_PASSWORD=RekUC9SOZ0bClyl7'
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - inversanet
+    tty: true
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    tty: true
     ports:
-      - 80:80
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./:/var/www/html
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/ssl/:/etc/nginx/ssl/
+    networks:
+      - inversanet
+
+#Docker Networks
+networks:
+  inversanet:
+    driver: bridge

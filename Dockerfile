@@ -1,6 +1,8 @@
 # Use the official PHP image as the base image
 FROM php:8.1-fpm
 
+COPY composer.lock composer.json /var/www/html/
+
 # Set the working directory inside the container
 WORKDIR /var/www/html
 
@@ -26,6 +28,9 @@ COPY . .
 # Install application dependencies
 RUN composer install --no-interaction --no-scripts --no-suggest
 
+# Remove Cache
+RUN rm -rf /var/cache/apk/*
+
 # Generate application key
 RUN php artisan key:generate
 
@@ -34,8 +39,11 @@ RUN chown -R www-data:www-data \
     storage \
     bootstrap/cache
 
+# Change current user to www
+USER www-data
+
 # Expose port 9000 for PHP-FPM
-EXPOSE 80
+EXPOSE 9000
 
 # Start PHP-FPM
 CMD ["php-fpm"]
